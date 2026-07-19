@@ -171,6 +171,28 @@ Deno.serve(async (req) => {
 
     let created = 0;
     let updated = 0;
+    let removed = 0;
+
+    // Reconciliation runs both ways: a day whose calendar events have all been
+    // deleted must lose its entry too. Only rows this sync created are eligible -
+    // days ticked by hand are never touched.
+    const windowStart = timeMin.slice(0, 10);
+    const { data: syncedRows, error: syncedError } = await supabase
+      .from("activities")
+      .select("id, occurred_on")
+      .eq("habit_id", habit.id)
+      .eq("source", "google_calendar")
+      .gte("occurred_on", windowStart);
+
+    if (syncedError) throw new Error(`Failed to load synced rows: ${syncedError.message}`);
+
+    for (const row of syncedRows ?? []) {
+      if (!byDay.has(row.occurred_on)) {
+        const { error } = await supabase.from("activities").delete().eq("id", row.id);
+        if (error) throw new Error(`Delete failed for ${row.occurred_on}: ${error.message}`);
+        removed += 1;
+      }
+    }
 
     for (const [day, { seconds, firstStart }] of byDay) {
       const { data: existing, error: selError } = await supabase
@@ -205,10 +227,12 @@ Deno.serve(async (req) => {
       }
     }
 
-    console.log(`[sync-calendar] ${events.length} events -> ${created} new, ${updated} updated`);
+    console.log(
+      `[sync-calendar] ${events.length} events -> ${created} new, ${updated} updated, ${removed} removed`,
+    );
 
     return new Response(
-      JSON.stringify({ events: events.length, days: byDay.size, created, updated }),
+      JSON.stringify({ events: events.length, days: byDay.size, created, updated, removed }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
   } catch (error) {

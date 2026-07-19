@@ -1,6 +1,4 @@
-import { useState } from 'react';
-import { RefreshCw, X } from 'lucide-react';
-import { supabase } from '@/lib/store/supabaseStore';
+import { X } from 'lucide-react';
 import { MONTHS, WEEKS_PER_MONTH, type Lesson } from '@/lib/program';
 
 interface SettingsPanelProps {
@@ -9,7 +7,6 @@ interface SettingsPanelProps {
   /** The lesson newly clocked days inherit. */
   activeLesson: Lesson | null;
   onSelectLesson: (lesson: Lesson) => void;
-  onSynced: () => void;
 }
 
 /**
@@ -22,32 +19,8 @@ export function SettingsPanel({
   onClose,
   activeLesson,
   onSelectLesson,
-  onSynced,
 }: SettingsPanelProps) {
-  const [syncState, setSyncState] = useState<'idle' | 'running' | 'done' | 'error'>('idle');
-  const [syncMessage, setSyncMessage] = useState<string | null>(null);
-
   if (!open) return null;
-
-  const runSync = async () => {
-    if (!supabase) {
-      setSyncState('error');
-      setSyncMessage('Not connected to the database.');
-      return;
-    }
-    setSyncState('running');
-    setSyncMessage(null);
-    try {
-      const { data, error } = await supabase.functions.invoke('sync-calendar');
-      if (error) throw new Error(error.message);
-      setSyncState('done');
-      setSyncMessage(`${data?.created ?? 0} new, ${data?.updated ?? 0} updated`);
-      onSynced();
-    } catch (err) {
-      setSyncState('error');
-      setSyncMessage(err instanceof Error ? err.message : 'Sync failed.');
-    }
-  };
 
   return (
     <div className="fixed inset-0 z-50 bg-background">
@@ -96,33 +69,6 @@ export function SettingsPanel({
           </div>
         </section>
 
-        <section className="mt-10">
-          <h2 className="text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
-            Calendar
-          </h2>
-          <p className="mb-4 mt-1.5 text-xs text-muted-foreground">
-            Pulls the last 90 days from your Movement calendar and fills in the times.
-          </p>
-
-          <button
-            onClick={runSync}
-            disabled={syncState === 'running'}
-            className="flex items-center gap-2 rounded-md bg-muted px-3 py-2 text-xs text-foreground transition-colors hover:bg-muted/70 disabled:opacity-50"
-          >
-            <RefreshCw className={`h-3.5 w-3.5 ${syncState === 'running' ? 'animate-spin' : ''}`} />
-            {syncState === 'running' ? 'Syncing…' : 'Sync now'}
-          </button>
-
-          {syncMessage && (
-            <p
-              className={`mt-2 text-xs ${
-                syncState === 'error' ? 'text-day-missed' : 'text-muted-foreground'
-              }`}
-            >
-              {syncMessage}
-            </p>
-          )}
-        </section>
       </div>
     </div>
   );

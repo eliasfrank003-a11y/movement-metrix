@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { differenceInCalendarDays, format } from 'date-fns';
-import { Moon, Settings, Sun } from 'lucide-react';
+import { Moon, RefreshCw, Settings, Sun } from 'lucide-react';
 import { buildPlan, PLAN_DAYS, type PlanDay } from '@/lib/plan';
 import type { Activity } from '@/lib/types';
 import { useTheme } from '@/hooks/useTheme';
@@ -16,6 +16,9 @@ interface MovementViewProps {
   doneDays: Set<string>;
   onToggle: (day: PlanDay) => void;
   onOpenSettings: () => void;
+  onSync: () => void;
+  syncing: boolean;
+  syncEnabled: boolean;
 }
 
 export function MovementView({
@@ -24,6 +27,9 @@ export function MovementView({
   doneDays,
   onToggle,
   onOpenSettings,
+  onSync,
+  syncing,
+  syncEnabled,
 }: MovementViewProps) {
   const months = useMemo(() => buildPlan(startDate), [startDate]);
   const { theme, toggle } = useTheme();
@@ -46,6 +52,16 @@ export function MovementView({
           </p>
         </div>
         <div className="flex items-center gap-4">
+          {syncEnabled && (
+            <button
+              onClick={onSync}
+              disabled={syncing}
+              aria-label="Sync calendar now"
+              className="text-muted-foreground transition-colors hover:text-foreground disabled:opacity-60"
+            >
+              <RefreshCw className={`h-4 w-4 ${syncing ? 'animate-spin' : ''}`} />
+            </button>
+          )}
           <button
             onClick={toggle}
             aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}

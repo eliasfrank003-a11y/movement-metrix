@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useHabits } from '@/hooks/useHabits';
+import { useCalendarSync } from '@/hooks/useCalendarSync';
 import { MovementView } from '@/components/MovementView';
 import { SwipeDeck } from '@/components/SwipeDeck';
 import { SettingsPanel } from '@/components/SettingsPanel';
@@ -13,6 +14,7 @@ export default function App() {
   const { habits, activities, isLoading, error, toggleDay, setActiveLesson, refetch } =
     useHabits();
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const { state: syncState, sync, enabled: syncEnabled } = useCalendarSync(refetch);
 
   const movement = habits[0];
 
@@ -59,6 +61,9 @@ export default function App() {
                 doneDays={doneDays}
                 onToggle={handleToggle}
                 onOpenSettings={() => setSettingsOpen(true)}
+                onSync={sync}
+                syncing={syncState === 'running'}
+                syncEnabled={syncEnabled}
               />
             ),
           },
@@ -70,7 +75,6 @@ export default function App() {
         onClose={() => setSettingsOpen(false)}
         activeLesson={activeLesson}
         onSelectLesson={(lesson) => movement && setActiveLesson(movement.id, lesson)}
-        onSynced={refetch}
       />
     </div>
   );
