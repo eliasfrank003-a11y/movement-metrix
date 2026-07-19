@@ -3,6 +3,9 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
 export default defineConfig({
+  // Served from https://<user>.github.io/movement-metrix/, so assets need the
+  // repo name as a prefix. Note the repo is "metrix", not "metrics".
+  base: '/movement-metrix/',
   plugins: [react()],
   resolve: {
     alias: {
