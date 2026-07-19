@@ -10,7 +10,8 @@ import type { Lesson } from '@/lib/program';
 const PLAN_START = new Date(2026, 6, 19); // 19 July 2026
 
 export default function App() {
-  const { habits, activities, isLoading, error, toggleDay, setActiveLesson } = useHabits();
+  const { habits, activities, isLoading, error, toggleDay, setActiveLesson, refetch } =
+    useHabits();
   const [settingsOpen, setSettingsOpen] = useState(false);
 
   const movement = habits[0];
@@ -69,6 +70,7 @@ export default function App() {
         onClose={() => setSettingsOpen(false)}
         activeLesson={activeLesson}
         onSelectLesson={(lesson) => movement && setActiveLesson(movement.id, lesson)}
+        onSynced={refetch}
       />
     </div>
   );

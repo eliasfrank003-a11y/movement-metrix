@@ -1,0 +1,4 @@
+project_id = "yalbfdarmdrojayvgvvm"
+
+[functions.sync-calendar]
+verify_jwt = false
