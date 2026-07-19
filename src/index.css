@@ -1,0 +1,30 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 220 20% 10%;
+    --card: 220 14% 98%;
+    --muted: 220 14% 94%;
+    --muted-foreground: 215 16% 47%;
+    --border: 220 13% 88%;
+    --accent: 142 71% 45%;
+  }
+
+  .dark {
+    --background: 0 0% 4%;
+    --foreground: 0 0% 98%;
+    --card: 0 0% 8%;
+    --muted: 0 0% 12%;
+    --muted-foreground: 215 16% 60%;
+    --border: 0 0% 18%;
+    --accent: 142 71% 45%;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
+  }
+}
