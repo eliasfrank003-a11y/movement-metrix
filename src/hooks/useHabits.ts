@@ -1,16 +1,12 @@
 import { useCallback, useEffect, useState } from 'react';
 import { format } from 'date-fns';
-import { supabase } from '@/lib/supabase';
+import { store } from '@/lib/store';
 import type { Activity, Habit } from '@/lib/types';
 
 // This hook is called from more than one component, and each call owns its own
 // state. Mutations broadcast so every mounted instance refetches - without this,
 // completing a habit in one view leaves the others showing stale data.
 const REFRESH_EVENT = 'movement:refresh';
-
-function broadcastRefresh() {
-  window.dispatchEvent(new CustomEvent(REFRESH_EVENT));
-}
 
 export function useHabits() {
   const [habits, setHabits] = useState<Habit[]>([]);
@@ -20,24 +16,13 @@ export function useHabits() {
 
   const fetchAll = useCallback(async () => {
     try {
-      const [habitsRes, activitiesRes] = await Promise.all([
-        supabase
-          .from('habits')
-          .select('*')
-          .is('archived_at', null)
-          .order('sort_order', { ascending: true }),
-        supabase.from('activities').select('*').order('occurred_on', { ascending: false }),
-      ]);
-
-      if (habitsRes.error) throw new Error(habitsRes.error.message);
-      if (activitiesRes.error) throw new Error(activitiesRes.error.message);
-
-      setHabits(habitsRes.data ?? []);
-      setActivities(activitiesRes.data ?? []);
+      const { habits: h, activities: a } = await store.load();
+      setHabits(h);
+      setActivities(a);
       setError(null);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to load data.';
-      console.error('[movement] fetch failed:', err);
+      console.error('[movement] load failed:', err);
       setError(message);
     } finally {
       setIsLoading(false);
@@ -54,64 +39,43 @@ export function useHabits() {
     return () => window.removeEventListener(REFRESH_EVENT, handler);
   }, [fetchAll]);
 
-  /**
-   * Mark a habit done or undone for a given day. The unique index on
-   * (habit_id, occurred_on) means this can never create a duplicate.
-   */
-  const toggleDay = useCallback(
-    async (habitId: number, day: Date) => {
-      const occurredOn = format(day, 'yyyy-MM-dd');
-      const existing = activities.find(
-        (a) => a.habit_id === habitId && a.occurred_on === occurredOn
-      );
-
+  /** Run a mutation, then refresh every mounted instance. */
+  const mutate = useCallback(
+    async (action: () => Promise<void>) => {
       try {
-        if (existing) {
-          const { error: delError } = await supabase
-            .from('activities')
-            .delete()
-            .eq('id', existing.id);
-          if (delError) throw new Error(delError.message);
-        } else {
-          const { error: insError } = await supabase
-            .from('activities')
-            .insert({ habit_id: habitId, occurred_on: occurredOn, source: 'manual' });
-          if (insError) throw new Error(insError.message);
-        }
+        await action();
         await fetchAll();
-        broadcastRefresh();
+        window.dispatchEvent(new CustomEvent(REFRESH_EVENT));
       } catch (err) {
-        const message = err instanceof Error ? err.message : 'Failed to update.';
-        console.error('[movement] toggle failed:', err);
+        const message = err instanceof Error ? err.message : 'Something went wrong.';
+        console.error('[movement] mutation failed:', err);
         setError(message);
+        throw err;
       }
     },
-    [activities, fetchAll]
+    [fetchAll]
+  );
+
+  const toggleDay = useCallback(
+    (habitId: number, day: Date) =>
+      mutate(() => store.toggleDay(habitId, format(day, 'yyyy-MM-dd'))),
+    [mutate]
   );
 
   const createHabit = useCallback(
-    async (input: { name: string; color: string; weeklyTarget: number }) => {
-      const { error: insError } = await supabase.from('habits').insert({
-        name: input.name,
-        color: input.color,
-        weekly_target: input.weeklyTarget,
-        sort_order: habits.length,
-      });
-      if (insError) throw new Error(insError.message);
-      await fetchAll();
-      broadcastRefresh();
-    },
-    [habits.length, fetchAll]
+    (input: { name: string; color: string; weeklyTarget: number }) =>
+      mutate(() => store.createHabit(input)),
+    [mutate]
+  );
+
+  const updateHabit = useCallback(
+    (habitId: number, patch: Partial<Habit>) => mutate(() => store.updateHabit(habitId, patch)),
+    [mutate]
   );
 
   const deleteHabit = useCallback(
-    async (habitId: number) => {
-      const { error: delError } = await supabase.from('habits').delete().eq('id', habitId);
-      if (delError) throw new Error(delError.message);
-      await fetchAll();
-      broadcastRefresh();
-    },
-    [fetchAll]
+    (habitId: number) => mutate(() => store.deleteHabit(habitId)),
+    [mutate]
   );
 
   return {
@@ -119,9 +83,11 @@ export function useHabits() {
     activities,
     isLoading,
     error,
+    storeName: store.name,
     refetch: fetchAll,
     toggleDay,
     createHabit,
+    updateHabit,
     deleteHabit,
   };
 }

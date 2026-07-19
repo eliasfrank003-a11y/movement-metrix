@@ -4,7 +4,7 @@ import { HabitRow } from '@/components/HabitRow';
 import { AddHabitForm } from '@/components/AddHabitForm';
 
 export default function App() {
-  const { habits, activities, isLoading, error, toggleDay, createHabit } = useHabits();
+  const { habits, activities, isLoading, error, storeName, toggleDay, createHabit } = useHabits();
 
   return (
     <div className="mx-auto min-h-screen w-full max-w-2xl px-4 py-8">
@@ -12,6 +12,11 @@ export default function App() {
         <h1 className="text-2xl font-semibold tracking-tight">Movement Metrics</h1>
         <p className="mt-1 text-sm text-muted-foreground">
           {format(new Date(), 'EEEE, d MMMM')}
+          {storeName === 'local' && (
+            <span className="ml-2 rounded bg-muted px-1.5 py-0.5 text-[10px] uppercase tracking-wide">
+              local data
+            </span>
+          )}
         </p>
       </header>
 
