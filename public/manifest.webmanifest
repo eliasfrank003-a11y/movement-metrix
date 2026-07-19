@@ -1,0 +1,22 @@
+{
+  "name": "Movement",
+  "short_name": "Movement",
+  "start_url": "/movement-metrix/",
+  "scope": "/movement-metrix/",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/movement-metrix/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/movement-metrix/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

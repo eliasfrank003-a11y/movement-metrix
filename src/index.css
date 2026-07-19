@@ -44,5 +44,16 @@
   body {
     @apply bg-background text-foreground antialiased;
     font-family: ui-sans-serif, system-ui, -apple-system, 'SF Pro Text', sans-serif;
+    /* Installed on the home screen there is no browser chrome, so the page
+       would otherwise run under the notch and the home indicator. */
+    padding: env(safe-area-inset-top) env(safe-area-inset-right)
+      env(safe-area-inset-bottom) env(safe-area-inset-left);
+  }
+
+  /* Stops the whole page rubber-banding vertically when it's a standalone app. */
+  @media (display-mode: standalone) {
+    body {
+      overscroll-behavior-y: none;
+    }
   }
 }
