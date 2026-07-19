@@ -1,53 +1,54 @@
-import { format } from 'date-fns';
+import { useMemo } from 'react';
 import { useHabits } from '@/hooks/useHabits';
-import { HabitRow } from '@/components/HabitRow';
-import { AddHabitForm } from '@/components/AddHabitForm';
+import { MovementView } from '@/components/MovementView';
+import { SwipeDeck } from '@/components/SwipeDeck';
+import type { PlanDay } from '@/lib/plan';
+
+/** The day the plan begins. Days before this render as inactive placeholders. */
+const PLAN_START = new Date(2026, 6, 19); // 19 July 2026
 
 export default function App() {
-  const { habits, activities, isLoading, error, storeName, toggleDay, createHabit } = useHabits();
+  const { habits, activities, isLoading, error, toggleDay } = useHabits();
+
+  const movement = habits[0];
+
+  const doneDays = useMemo(
+    () =>
+      new Set(
+        activities.filter((a) => a.habit_id === movement?.id).map((a) => a.occurred_on)
+      ),
+    [activities, movement?.id]
+  );
+
+  const handleToggle = (day: PlanDay) => {
+    if (!movement) return;
+    toggleDay(movement.id, day.date);
+  };
+
+  if (isLoading) {
+    return <div className="p-6 text-sm text-muted-foreground">Loading…</div>;
+  }
+
+  if (error) {
+    return <div className="p-6 text-sm text-destructive">{error}</div>;
+  }
 
   return (
-    <div className="mx-auto min-h-screen w-full max-w-2xl px-4 py-8">
-      <header className="mb-6">
-        <h1 className="text-2xl font-semibold tracking-tight">Movement Metrics</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          {format(new Date(), 'EEEE, d MMMM')}
-          {storeName === 'local' && (
-            <span className="ml-2 rounded bg-muted px-1.5 py-0.5 text-[10px] uppercase tracking-wide">
-              local data
-            </span>
-          )}
-        </p>
-      </header>
-
-      {error && (
-        <div className="mb-4 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-500">
-          {error}
-        </div>
-      )}
-
-      {isLoading ? (
-        <p className="text-sm text-muted-foreground">Loading…</p>
-      ) : (
-        <div className="grid gap-3">
-          {habits.map((habit) => (
-            <HabitRow
-              key={habit.id}
-              habit={habit}
-              activities={activities}
-              onToggle={toggleDay}
-            />
-          ))}
-
-          {habits.length === 0 && (
-            <p className="py-6 text-center text-sm text-muted-foreground">
-              No habits yet. Add your first one below.
-            </p>
-          )}
-
-          <AddHabitForm onCreate={createHabit} />
-        </div>
-      )}
+    <div className="mx-auto max-w-md">
+      <SwipeDeck
+        pages={[
+          {
+            id: 'movement',
+            content: (
+              <MovementView
+                startDate={PLAN_START}
+                doneDays={doneDays}
+                onToggle={handleToggle}
+              />
+            ),
+          },
+        ]}
+      />
     </div>
   );
 }

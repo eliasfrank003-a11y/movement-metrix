@@ -2,29 +2,47 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Tokens copied from musical-metrics so the two apps read as one family. */
 @layer base {
   :root {
-    --background: 0 0% 100%;
+    --background: 210 40% 98%;
     --foreground: 220 20% 10%;
-    --card: 220 14% 98%;
-    --muted: 220 14% 94%;
-    --muted-foreground: 215 16% 47%;
-    --border: 220 13% 88%;
-    --accent: 142 71% 45%;
+    --card: 0 0% 100%;
+    --primary: 142 76% 36%;
+    --primary-foreground: 0 0% 100%;
+    --muted: 220 14% 92%;
+    --muted-foreground: 215 20% 45%;
+    --border: 220 14% 86%;
+    --destructive: 0 72% 51%;
+
+    /* The day grid has its own scale. On a near-white page the empty ring must
+       be dark enough to read, and the rest dot sits one step lighter. */
+    --day-empty: 220 13% 78%;
+    --day-rest: 220 13% 88%;
+    --day-today: 220 20% 10%;
   }
 
+  /* Dark is the default; applied as a class so the toggle controls it. */
   .dark {
-    --background: 0 0% 4%;
-    --foreground: 0 0% 98%;
-    --card: 0 0% 8%;
-    --muted: 0 0% 12%;
-    --muted-foreground: 215 16% 60%;
-    --border: 0 0% 18%;
-    --accent: 142 71% 45%;
+    --background: 0 0% 0%;
+    --foreground: 0 0% 100%;
+    --card: 0 0% 5%;
+    --primary: 145 100% 40%;
+    --primary-foreground: 0 0% 0%;
+    --muted: 0 0% 10%;
+    --muted-foreground: 212 18% 54%;
+    --border: 0 0% 15%;
+    --destructive: 4 90% 60%;
+
+    /* Three steps down from the green, all sized identically so the grid stays
+       even. On pure black anything under ~20% lightness disappears at 16px. */
+    --day-empty: 0 0% 34%;
+    --day-rest: 0 0% 20%;
+    --day-today: 0 0% 100%;
   }
 
   body {
     @apply bg-background text-foreground antialiased;
-    font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
+    font-family: ui-sans-serif, system-ui, -apple-system, 'SF Pro Text', sans-serif;
   }
 }

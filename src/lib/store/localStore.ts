@@ -1,8 +1,8 @@
-import { format, subDays } from 'date-fns';
 import type { Activity, Habit } from '@/lib/types';
 import type { HabitStore } from './types';
 
-const STORAGE_KEY = 'movement-metrics:v1';
+// Bump this when the seed shape changes so stale local data is replaced.
+const STORAGE_KEY = 'movement-metrics:v2';
 
 interface Snapshot {
   habits: Habit[];
@@ -11,38 +11,22 @@ interface Snapshot {
   nextActivityId: number;
 }
 
-/** A few habits with plausible history, so the UI has something to show on day one. */
+/** One skill to start with. More become extra pages in the swipe deck. */
 function seed(): Snapshot {
-  const today = new Date();
   const habits: Habit[] = [
-    { id: 1, name: 'Running', color: 'emerald', weekly_target: 3, calendar_id: null, sort_order: 0, archived_at: null },
-    { id: 2, name: 'Gym', color: 'sky', weekly_target: 2, calendar_id: null, sort_order: 1, archived_at: null },
-    { id: 3, name: 'Stretching', color: 'amber', weekly_target: 5, calendar_id: null, sort_order: 2, archived_at: null },
+    {
+      id: 1,
+      name: 'Movement',
+      color: 'emerald',
+      weekly_target: 5,
+      calendar_id: null,
+      sort_order: 0,
+      archived_at: null,
+    },
   ];
 
-  // Deterministic-ish spread so the heatmap looks like real use rather than noise.
-  const pattern: Record<number, number[]> = {
-    1: [0, 2, 5, 7, 9, 12, 14, 16, 19, 21, 23, 26],
-    2: [1, 4, 8, 11, 15, 18, 22, 25],
-    3: [0, 1, 2, 3, 5, 6, 7, 9, 10, 12, 13, 14, 16, 17, 19, 20, 21, 23, 24, 26, 27],
-  };
-
-  let id = 1;
-  const activities: Activity[] = [];
-  for (const habit of habits) {
-    for (const offset of pattern[habit.id]) {
-      activities.push({
-        id: id++,
-        habit_id: habit.id,
-        occurred_on: format(subDays(today, offset), 'yyyy-MM-dd'),
-        duration_seconds: null,
-        source: 'manual',
-        note: null,
-      });
-    }
-  }
-
-  return { habits, activities, nextHabitId: 4, nextActivityId: id };
+  // Starts empty - the year ahead is the point, not backfilled history.
+  return { habits, activities: [], nextHabitId: 2, nextActivityId: 1 };
 }
 
 function read(): Snapshot {
