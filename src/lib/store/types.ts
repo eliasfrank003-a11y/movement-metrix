@@ -16,4 +16,6 @@ export interface HabitStore {
   /** Mark done if not done, clear if already done. Idempotent per (habit, day). */
   toggleDay(habitId: number, occurredOn: string): Promise<void>;
   setDuration(habitId: number, occurredOn: string, seconds: number | null): Promise<void>;
+  /** Tag a day with its curriculum position. Creates the day if not yet done. */
+  setLesson(habitId: number, occurredOn: string, month: number, week: number): Promise<void>;
 }

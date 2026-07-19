@@ -105,6 +105,33 @@ export const localStore: HabitStore = {
         duration_seconds: null,
         source: 'manual',
         note: null,
+        lesson_month: null,
+        lesson_week: null,
+      });
+      snap.nextActivityId += 1;
+    }
+    write(snap);
+  },
+
+  async setLesson(habitId, occurredOn, month, week) {
+    const snap = read();
+    const existing = snap.activities.find(
+      (a) => a.habit_id === habitId && a.occurred_on === occurredOn
+    );
+    if (existing) {
+      existing.lesson_month = month;
+      existing.lesson_week = week;
+    } else {
+      // Tagging a lesson implies the session happened.
+      snap.activities.push({
+        id: snap.nextActivityId,
+        habit_id: habitId,
+        occurred_on: occurredOn,
+        duration_seconds: null,
+        source: 'manual',
+        note: null,
+        lesson_month: month,
+        lesson_week: week,
       });
       snap.nextActivityId += 1;
     }

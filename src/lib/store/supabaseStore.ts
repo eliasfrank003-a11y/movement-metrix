@@ -75,6 +75,22 @@ export const supabaseStore: HabitStore = {
     }
   },
 
+  async setLesson(habitId, occurredOn, month, week) {
+    const { error } = await client()
+      .from('activities')
+      .upsert(
+        {
+          habit_id: habitId,
+          occurred_on: occurredOn,
+          source: 'manual',
+          lesson_month: month,
+          lesson_week: week,
+        },
+        { onConflict: 'habit_id,occurred_on' }
+      );
+    check(error);
+  },
+
   async setDuration(habitId, occurredOn, seconds) {
     const { error } = await client()
       .from('activities')

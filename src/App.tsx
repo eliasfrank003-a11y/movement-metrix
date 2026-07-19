@@ -3,12 +3,13 @@ import { useHabits } from '@/hooks/useHabits';
 import { MovementView } from '@/components/MovementView';
 import { SwipeDeck } from '@/components/SwipeDeck';
 import type { PlanDay } from '@/lib/plan';
+import type { Lesson } from '@/lib/program';
 
 /** The day the plan begins. Days before this render as inactive placeholders. */
 const PLAN_START = new Date(2026, 6, 19); // 19 July 2026
 
 export default function App() {
-  const { habits, activities, isLoading, error, toggleDay } = useHabits();
+  const { habits, activities, isLoading, error, toggleDay, setLesson } = useHabits();
 
   const movement = habits[0];
 
@@ -23,6 +24,11 @@ export default function App() {
   const handleToggle = (day: PlanDay) => {
     if (!movement) return;
     toggleDay(movement.id, day.date);
+  };
+
+  const handlePickLesson = (lesson: Lesson) => {
+    if (!movement) return;
+    setLesson(movement.id, new Date(), lesson.month, lesson.week);
   };
 
   if (isLoading) {
@@ -42,8 +48,10 @@ export default function App() {
             content: (
               <MovementView
                 startDate={PLAN_START}
+                activities={activities.filter((a) => a.habit_id === movement?.id)}
                 doneDays={doneDays}
                 onToggle={handleToggle}
+                onPickLesson={handlePickLesson}
               />
             ),
           },

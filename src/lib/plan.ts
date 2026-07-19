@@ -17,6 +17,17 @@ export interface PlanDay {
   key: string;
   kind: DayKind;
   isToday: boolean;
+  /** True once the day is in the past. Used to mark misses. */
+  isPast: boolean;
+}
+
+/**
+ * A miss is derived, never stored: a training day that has already passed with
+ * nothing recorded against it. Today is never a miss - the day isn't over.
+ * Rest days can't be missed.
+ */
+export function isMissed(day: PlanDay, done: boolean): boolean {
+  return day.kind === 'train' && day.isPast && !day.isToday && !done;
 }
 
 export interface PlanMonth {
@@ -51,11 +62,13 @@ export function buildPlan(start: Date, today = new Date()): PlanMonth[] {
     if (!months.has(id)) {
       months.set(id, { id, label: format(date, 'MMMM yyyy'), days: [] });
     }
+    const dayOffset = differenceInCalendarDays(date, today);
     months.get(id)!.days.push({
       date,
       key: format(date, 'yyyy-MM-dd'),
       kind,
-      isToday: differenceInCalendarDays(date, today) === 0,
+      isToday: dayOffset === 0,
+      isPast: dayOffset < 0,
     });
   }
 

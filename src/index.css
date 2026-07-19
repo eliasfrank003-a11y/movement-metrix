@@ -20,6 +20,7 @@
     --day-empty: 220 13% 78%;
     --day-rest: 220 13% 88%;
     --day-today: 220 20% 10%;
+    --day-missed: 8 58% 52%;
   }
 
   /* Dark is the default; applied as a class so the toggle controls it. */
@@ -39,6 +40,9 @@
     --day-empty: 0 0% 34%;
     --day-rest: 0 0% 20%;
     --day-today: 0 0% 100%;
+    /* A muted terracotta: legible against black as a miss without the alarm of
+       a pure red sitting next to 300 other dots. */
+    --day-missed: 8 52% 44%;
   }
 
   body {

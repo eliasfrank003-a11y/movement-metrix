@@ -62,6 +62,12 @@ export function useHabits() {
     [mutate]
   );
 
+  const setLesson = useCallback(
+    (habitId: number, day: Date, month: number, week: number) =>
+      mutate(() => store.setLesson(habitId, format(day, 'yyyy-MM-dd'), month, week)),
+    [mutate]
+  );
+
   const createHabit = useCallback(
     (input: { name: string; color: string; weeklyTarget: number }) =>
       mutate(() => store.createHabit(input)),
@@ -86,6 +92,7 @@ export function useHabits() {
     storeName: store.name,
     refetch: fetchAll,
     toggleDay,
+    setLesson,
     createHabit,
     updateHabit,
     deleteHabit,

@@ -1,4 +1,4 @@
-import type { PlanDay } from '@/lib/plan';
+import { isMissed, type PlanDay } from '@/lib/plan';
 
 interface DayCircleProps {
   day: PlanDay;
@@ -22,12 +22,15 @@ export function DayCircle({ day, done, onToggle }: DayCircleProps) {
   }
 
   const isRest = day.kind === 'rest';
+  const missed = isMissed(day, done);
 
   return (
     <button
       onClick={() => onToggle(day)}
       aria-pressed={done}
-      aria-label={`${day.date.toDateString()}${isRest ? ', rest day' : ''}${done ? ', done' : ''}`}
+      aria-label={`${day.date.toDateString()}${isRest ? ', rest day' : ''}${
+        done ? ', done' : missed ? ', missed' : ''
+      }`}
       className="flex h-[18px] w-[18px] items-center justify-center"
     >
       <span
@@ -38,7 +41,9 @@ export function DayCircle({ day, done, onToggle }: DayCircleProps) {
               ? // A smaller solid dot every sixth day: the rest cadence reads as
                 // rhythm rather than as a gap, and needs no second colour.
                 'h-1.5 w-1.5 bg-day-empty'
-              : 'h-3 w-3 border border-day-empty hover:border-foreground/60'
+              : missed
+                ? 'h-3 w-3 border border-day-missed bg-day-missed/25'
+                : 'h-3 w-3 border border-day-empty hover:border-foreground/60'
         } ${day.isToday && !done ? 'ring-1 ring-day-today ring-offset-2 ring-offset-background' : ''}`}
       />
     </button>

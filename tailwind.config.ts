@@ -24,6 +24,7 @@ export default {
           empty: 'hsl(var(--day-empty))',
           rest: 'hsl(var(--day-rest))',
           today: 'hsl(var(--day-today))',
+          missed: 'hsl(var(--day-missed))',
         },
       },
       borderRadius: {

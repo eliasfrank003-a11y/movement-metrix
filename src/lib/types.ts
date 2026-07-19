@@ -16,6 +16,9 @@ export interface Activity {
   duration_seconds: number | null;
   source: 'manual' | 'google_calendar';
   note: string | null;
+  /** Curriculum position for this session. Null until you tag it. */
+  lesson_month: number | null;
+  lesson_week: number | null;
 }
 
 /** Tailwind classes per habit color, kept in one place so the palette stays consistent. */
