@@ -55,7 +55,15 @@ export const supabaseStore: HabitStore = {
     check(error);
   },
 
-  async toggleDay(habitId, occurredOn) {
+  async setActiveLesson(habitId, lesson) {
+    const { error } = await client()
+      .from('habits')
+      .update({ active_lesson_month: lesson.month, active_lesson_week: lesson.week })
+      .eq('id', habitId);
+    check(error);
+  },
+
+  async toggleDay(habitId, occurredOn, lesson) {
     const { data, error: selError } = await client()
       .from('activities')
       .select('id')
@@ -70,7 +78,13 @@ export const supabaseStore: HabitStore = {
     } else {
       const { error } = await client()
         .from('activities')
-        .insert({ habit_id: habitId, occurred_on: occurredOn, source: 'manual' });
+        .insert({
+          habit_id: habitId,
+          occurred_on: occurredOn,
+          source: 'manual',
+          lesson_month: lesson?.month ?? null,
+          lesson_week: lesson?.week ?? null,
+        });
       check(error);
     }
   },

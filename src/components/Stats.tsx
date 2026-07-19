@@ -2,7 +2,6 @@ interface StatsProps {
   totalSeconds: number;
   /** Days elapsed since the plan started, for the daily average. */
   daysElapsed: number;
-  currentStreak: number;
 }
 
 function formatDuration(seconds: number): string {
@@ -15,23 +14,22 @@ function formatDuration(seconds: number): string {
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <div>
+    <div className="text-center">
       <div className="text-lg font-medium tabular-nums">{value}</div>
       <div className="mt-0.5 text-[11px] text-muted-foreground">{label}</div>
     </div>
   );
 }
 
-export function Stats({ totalSeconds, daysElapsed, currentStreak }: StatsProps) {
+export function Stats({ totalSeconds, daysElapsed }: StatsProps) {
   // Averaged over every elapsed day, not just active ones - a rest day counts
   // as a zero, which is the honest reading of "per day".
   const avgSeconds = daysElapsed > 0 ? totalSeconds / daysElapsed : 0;
 
   return (
-    <div className="grid grid-cols-3 gap-4">
+    <div className="flex justify-center gap-12">
       <Stat label="total moved" value={formatDuration(totalSeconds)} />
       <Stat label="daily average" value={formatDuration(avgSeconds)} />
-      <Stat label="streak" value={currentStreak > 0 ? `${currentStreak}d` : '—'} />
     </div>
   );
 }

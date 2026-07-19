@@ -2,7 +2,7 @@ import type { Activity, Habit } from '@/lib/types';
 import type { HabitStore } from './types';
 
 // Bump this when the seed shape changes so stale local data is replaced.
-const STORAGE_KEY = 'movement-metrics:v2';
+const STORAGE_KEY = 'movement-metrics:v3';
 
 interface Snapshot {
   habits: Habit[];
@@ -20,6 +20,8 @@ function seed(): Snapshot {
       color: 'emerald',
       weekly_target: 5,
       calendar_id: null,
+      active_lesson_month: 1,
+      active_lesson_week: 1,
       sort_order: 0,
       archived_at: null,
     },
@@ -70,6 +72,8 @@ export const localStore: HabitStore = {
       color: input.color,
       weekly_target: input.weeklyTarget,
       calendar_id: null,
+      active_lesson_month: 1,
+      active_lesson_week: 1,
       sort_order: snap.habits.length,
       archived_at: null,
     });
@@ -90,7 +94,17 @@ export const localStore: HabitStore = {
     write(snap);
   },
 
-  async toggleDay(habitId, occurredOn) {
+  async setActiveLesson(habitId, lesson) {
+    const snap = read();
+    snap.habits = snap.habits.map((h) =>
+      h.id === habitId
+        ? { ...h, active_lesson_month: lesson.month, active_lesson_week: lesson.week }
+        : h
+    );
+    write(snap);
+  },
+
+  async toggleDay(habitId, occurredOn, lesson) {
     const snap = read();
     const existing = snap.activities.find(
       (a) => a.habit_id === habitId && a.occurred_on === occurredOn
@@ -105,8 +119,9 @@ export const localStore: HabitStore = {
         duration_seconds: null,
         source: 'manual',
         note: null,
-        lesson_month: null,
-        lesson_week: null,
+        // Inherit whatever lesson is active, so days tag themselves.
+        lesson_month: lesson?.month ?? null,
+        lesson_week: lesson?.week ?? null,
       });
       snap.nextActivityId += 1;
     }

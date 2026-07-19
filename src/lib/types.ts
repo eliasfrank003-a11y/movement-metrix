@@ -4,6 +4,9 @@ export interface Habit {
   color: string;
   weekly_target: number;
   calendar_id: string | null;
+  /** The lesson every newly clocked day is tagged with, until you change it. */
+  active_lesson_month: number | null;
+  active_lesson_week: number | null;
   sort_order: number;
   archived_at: string | null;
 }

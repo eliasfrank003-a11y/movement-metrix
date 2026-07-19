@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { format } from 'date-fns';
 import { store } from '@/lib/store';
 import type { Activity, Habit } from '@/lib/types';
+import type { Lesson } from '@/lib/program';
 
 // This hook is called from more than one component, and each call owns its own
 // state. Mutations broadcast so every mounted instance refetches - without this,
@@ -57,8 +58,13 @@ export function useHabits() {
   );
 
   const toggleDay = useCallback(
-    (habitId: number, day: Date) =>
-      mutate(() => store.toggleDay(habitId, format(day, 'yyyy-MM-dd'))),
+    (habitId: number, day: Date, lesson?: Lesson | null) =>
+      mutate(() => store.toggleDay(habitId, format(day, 'yyyy-MM-dd'), lesson)),
+    [mutate]
+  );
+
+  const setActiveLesson = useCallback(
+    (habitId: number, lesson: Lesson) => mutate(() => store.setActiveLesson(habitId, lesson)),
     [mutate]
   );
 
@@ -92,6 +98,7 @@ export function useHabits() {
     storeName: store.name,
     refetch: fetchAll,
     toggleDay,
+    setActiveLesson,
     setLesson,
     createHabit,
     updateHabit,

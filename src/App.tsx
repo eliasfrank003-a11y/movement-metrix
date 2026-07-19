@@ -1,7 +1,8 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useHabits } from '@/hooks/useHabits';
 import { MovementView } from '@/components/MovementView';
 import { SwipeDeck } from '@/components/SwipeDeck';
+import { SettingsPanel } from '@/components/SettingsPanel';
 import type { PlanDay } from '@/lib/plan';
 import type { Lesson } from '@/lib/program';
 
@@ -9,7 +10,8 @@ import type { Lesson } from '@/lib/program';
 const PLAN_START = new Date(2026, 6, 19); // 19 July 2026
 
 export default function App() {
-  const { habits, activities, isLoading, error, toggleDay, setLesson } = useHabits();
+  const { habits, activities, isLoading, error, toggleDay, setActiveLesson } = useHabits();
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   const movement = habits[0];
 
@@ -21,14 +23,18 @@ export default function App() {
     [activities, movement?.id]
   );
 
+  // Days inherit whatever lesson is active in settings at the time they're clocked.
+  const activeLesson = useMemo<Lesson | null>(
+    () =>
+      movement?.active_lesson_month && movement?.active_lesson_week
+        ? { month: movement.active_lesson_month, week: movement.active_lesson_week }
+        : null,
+    [movement?.active_lesson_month, movement?.active_lesson_week]
+  );
+
   const handleToggle = (day: PlanDay) => {
     if (!movement) return;
-    toggleDay(movement.id, day.date);
-  };
-
-  const handlePickLesson = (lesson: Lesson) => {
-    if (!movement) return;
-    setLesson(movement.id, new Date(), lesson.month, lesson.week);
+    toggleDay(movement.id, day.date, activeLesson);
   };
 
   if (isLoading) {
@@ -51,11 +57,18 @@ export default function App() {
                 activities={activities.filter((a) => a.habit_id === movement?.id)}
                 doneDays={doneDays}
                 onToggle={handleToggle}
-                onPickLesson={handlePickLesson}
+                onOpenSettings={() => setSettingsOpen(true)}
               />
             ),
           },
         ]}
+      />
+
+      <SettingsPanel
+        open={settingsOpen}
+        onClose={() => setSettingsOpen(false)}
+        activeLesson={activeLesson}
+        onSelectLesson={(lesson) => movement && setActiveLesson(movement.id, lesson)}
       />
     </div>
   );

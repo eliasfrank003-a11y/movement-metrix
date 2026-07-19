@@ -1,15 +1,13 @@
 import { useMemo } from 'react';
 import { differenceInCalendarDays, format } from 'date-fns';
-import { Moon, Sun } from 'lucide-react';
+import { Moon, Settings, Sun } from 'lucide-react';
 import { buildPlan, PLAN_DAYS, type PlanDay } from '@/lib/plan';
-import type { Lesson } from '@/lib/program';
 import type { Activity } from '@/lib/types';
 import { useTheme } from '@/hooks/useTheme';
 import { DayCircle } from './DayCircle';
 import { ProgressBar } from './ProgressBar';
 import { Stats } from './Stats';
 import { ProgramChart } from './ProgramChart';
-import { LessonPicker } from './LessonPicker';
 
 interface MovementViewProps {
   /** Day the plan starts. Everything before it renders as inactive. */
@@ -17,7 +15,7 @@ interface MovementViewProps {
   activities: Activity[];
   doneDays: Set<string>;
   onToggle: (day: PlanDay) => void;
-  onPickLesson: (lesson: Lesson) => void;
+  onOpenSettings: () => void;
 }
 
 export function MovementView({
@@ -25,7 +23,7 @@ export function MovementView({
   activities,
   doneDays,
   onToggle,
-  onPickLesson,
+  onOpenSettings,
 }: MovementViewProps) {
   const months = useMemo(() => buildPlan(startDate), [startDate]);
   const { theme, toggle } = useTheme();
@@ -38,26 +36,6 @@ export function MovementView({
   const daysElapsed = Math.max(0, differenceInCalendarDays(new Date(), startDate)) + 1;
   const elapsedFraction = Math.min(1, daysElapsed / PLAN_DAYS);
 
-  // Consecutive completed training days working backwards from today.
-  const currentStreak = useMemo(() => {
-    let streak = 0;
-    const past = trainingDays.filter((d) => d.isPast || d.isToday).reverse();
-    for (const day of past) {
-      if (doneDays.has(day.key)) streak += 1;
-      else if (!day.isToday) break;
-    }
-    return streak;
-  }, [trainingDays, doneDays]);
-
-  // The lesson tagged most recently, used to highlight the picker.
-  const currentLesson = useMemo<Lesson | null>(() => {
-    const tagged = activities
-      .filter((a) => a.lesson_month !== null && a.lesson_week !== null)
-      .sort((a, b) => a.occurred_on.localeCompare(b.occurred_on));
-    const last = tagged[tagged.length - 1];
-    return last ? { month: last.lesson_month!, week: last.lesson_week! } : null;
-  }, [activities]);
-
   return (
     <div className="px-5 pb-20 pt-8">
       <header className="mb-7 flex items-start justify-between">
@@ -67,13 +45,22 @@ export function MovementView({
             {doneCount} / {PLAN_DAYS}
           </p>
         </div>
-        <button
-          onClick={toggle}
-          aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-          className="text-muted-foreground transition-colors hover:text-foreground"
-        >
-          {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-        </button>
+        <div className="flex items-center gap-4">
+          <button
+            onClick={toggle}
+            aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+            className="text-muted-foreground transition-colors hover:text-foreground"
+          >
+            {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+          </button>
+          <button
+            onClick={onOpenSettings}
+            aria-label="Open settings"
+            className="text-muted-foreground transition-colors hover:text-foreground"
+          >
+            <Settings className="h-4 w-4" />
+          </button>
+        </div>
       </header>
 
       <div className="mb-7">
@@ -85,19 +72,11 @@ export function MovementView({
       </div>
 
       <div className="mb-8">
-        <Stats
-          totalSeconds={totalSeconds}
-          daysElapsed={daysElapsed}
-          currentStreak={currentStreak}
-        />
+        <Stats totalSeconds={totalSeconds} daysElapsed={daysElapsed} />
       </div>
 
       <div className="mb-8">
         <ProgramChart activities={activities} startDate={startDate} />
-      </div>
-
-      <div className="mb-9">
-        <LessonPicker current={currentLesson} onPick={onPickLesson} />
       </div>
 
       <div className="space-y-8">
