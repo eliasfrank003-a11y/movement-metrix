@@ -1,4 +1,5 @@
-import { X } from 'lucide-react';
+import { Moon, Sun, X } from 'lucide-react';
+import { useTheme } from '@/hooks/useTheme';
 import { MONTHS, WEEKS_PER_MONTH, type Lesson } from '@/lib/program';
 
 interface SettingsPanelProps {
@@ -20,10 +21,12 @@ export function SettingsPanel({
   activeLesson,
   onSelectLesson,
 }: SettingsPanelProps) {
+  const { theme, toggle } = useTheme();
+
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-background">
+    <div className="app-scroll fixed inset-0 z-50 bg-background">
       <div className="mx-auto max-w-md px-5 pb-20 pt-8">
         <header className="mb-8 flex items-start justify-between">
           <h1 className="text-[26px] font-semibold tracking-tight">Settings</h1>
@@ -66,6 +69,36 @@ export function SettingsPanel({
                 );
               })
             )}
+          </div>
+        </section>
+
+        <section className="mt-10">
+          <h2 className="mb-3 text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
+            Appearance
+          </h2>
+
+          <div className="grid grid-cols-2 gap-1.5">
+            {(['dark', 'light'] as const).map((option) => (
+              <button
+                key={option}
+                onClick={() => {
+                  if (theme !== option) toggle();
+                }}
+                aria-pressed={theme === option}
+                className={`flex items-center justify-center gap-2 rounded-md py-2.5 text-[11px] capitalize transition-colors ${
+                  theme === option
+                    ? 'bg-primary text-primary-foreground'
+                    : 'bg-muted text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                {option === 'dark' ? (
+                  <Moon className="h-3.5 w-3.5" />
+                ) : (
+                  <Sun className="h-3.5 w-3.5" />
+                )}
+                {option}
+              </button>
+            ))}
           </div>
         </section>
 

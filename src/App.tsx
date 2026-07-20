@@ -49,8 +49,9 @@ export default function App() {
   }
 
   return (
-    <div className="mx-auto max-w-md">
-      <SwipeDeck
+    <div className="app-scroll">
+      <div className="mx-auto max-w-md">
+        <SwipeDeck
         pages={[
           {
             id: 'movement',
@@ -68,7 +69,8 @@ export default function App() {
             ),
           },
         ]}
-      />
+        />
+      </div>
 
       <SettingsPanel
         open={settingsOpen}

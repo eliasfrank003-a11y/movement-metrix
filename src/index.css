@@ -45,6 +45,15 @@
     --day-missed: 8 52% 44%;
   }
 
+  html,
+  body {
+    /* The page itself never scrolls - an inner container does. iOS draws its
+       overlay indicator for the document scroll no matter what CSS asks, but
+       honours the rules on a normal element. */
+    height: 100%;
+    overflow: hidden;
+  }
+
   body {
     @apply bg-background text-foreground antialiased;
     font-family: ui-sans-serif, system-ui, -apple-system, 'SF Pro Text', sans-serif;
@@ -61,16 +70,26 @@
     }
   }
 
-  /* Hide the scroll indicator. The grid is the whole interface, and a bar
-     tracking down the side of it is visual noise. */
-  html {
+  /* React mounts here; without a height the percentage chain breaks and the
+     scroll container just grows to fit its content instead of scrolling. */
+  #root {
+    height: 100%;
+  }
+
+  /* The one scrolling element, with its indicator suppressed. */
+  .app-scroll {
+    height: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain;
     scrollbar-width: none; /* Firefox */
     -ms-overflow-style: none; /* old Edge */
   }
 
-  html::-webkit-scrollbar,
-  body::-webkit-scrollbar,
-  *::-webkit-scrollbar {
+  .app-scroll::-webkit-scrollbar {
     display: none;
+    width: 0;
+    height: 0;
   }
 }

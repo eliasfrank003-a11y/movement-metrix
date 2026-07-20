@@ -1,9 +1,8 @@
 import { useMemo } from 'react';
 import { differenceInCalendarDays, format } from 'date-fns';
-import { Moon, RefreshCw, Settings, Sun } from 'lucide-react';
+import { RefreshCw, Settings } from 'lucide-react';
 import { buildPlan, PLAN_DAYS, type PlanDay } from '@/lib/plan';
 import type { Activity } from '@/lib/types';
-import { useTheme } from '@/hooks/useTheme';
 import { DayCircle } from './DayCircle';
 import { ProgressBar } from './ProgressBar';
 import { Stats } from './Stats';
@@ -32,7 +31,6 @@ export function MovementView({
   syncEnabled,
 }: MovementViewProps) {
   const months = useMemo(() => buildPlan(startDate), [startDate]);
-  const { theme, toggle } = useTheme();
 
   const allDays = useMemo(() => months.flatMap((m) => m.days), [months]);
   const trainingDays = allDays.filter((d) => d.kind === 'train');
@@ -69,13 +67,6 @@ export function MovementView({
               <RefreshCw className={`h-4 w-4 ${syncing ? 'animate-spin' : ''}`} />
             </button>
           )}
-          <button
-            onClick={toggle}
-            aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-            className="text-muted-foreground transition-colors hover:text-foreground"
-          >
-            {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-          </button>
           <button
             onClick={onOpenSettings}
             aria-label="Open settings"
