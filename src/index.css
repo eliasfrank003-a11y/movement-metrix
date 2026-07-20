@@ -60,4 +60,17 @@
       overscroll-behavior-y: none;
     }
   }
+
+  /* Hide the scroll indicator. The grid is the whole interface, and a bar
+     tracking down the side of it is visual noise. */
+  html {
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* old Edge */
+  }
+
+  html::-webkit-scrollbar,
+  body::-webkit-scrollbar,
+  *::-webkit-scrollbar {
+    display: none;
+  }
 }
