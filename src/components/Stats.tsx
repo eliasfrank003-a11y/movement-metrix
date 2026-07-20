@@ -18,16 +18,14 @@ function formatDuration(seconds: number): string {
 
 function Tile({ label, value, srLabel }: { label: string; value: string; srLabel: string }) {
   return (
-    <div className="rounded-xl bg-card px-3 py-2.5">
-      {/* A non-breaking space keeps the tiles the same height when the symbol
-          is omitted, and the real label stays available to screen readers. */}
-      <div className="text-[11px] text-muted-foreground" aria-hidden="true">
-        {label || ' '}
-      </div>
-      <div className="mt-0.5 text-[15px] font-medium tabular-nums">
-        <span className="sr-only">{srLabel}: </span>
-        {value}
-      </div>
+    <div className="flex items-baseline justify-center gap-1.5 rounded-xl bg-card px-3 py-3">
+      <span className="sr-only">{srLabel}: </span>
+      {label && (
+        <span className="text-[13px] text-muted-foreground" aria-hidden="true">
+          {label}
+        </span>
+      )}
+      <span className="text-[15px] font-medium tabular-nums">{value}</span>
     </div>
   );
 }
