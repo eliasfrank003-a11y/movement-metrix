@@ -49,9 +49,17 @@ export function ProgramChart({ activities, startDate }: ProgramChartProps) {
     : '';
 
   const last = points[points.length - 1];
+
+  // Hold the current level out to today, so a single session reads as a line
+  // rather than a stray dot, and the leading edge always means "now".
+  const todayDay = differenceInCalendarDays(new Date(), startDate);
+  const lineToToday =
+    last && todayDay > last.day ? `${line} L ${x(todayDay)} ${y(last.index)}` : line;
+  const edgeX = last ? Math.max(x(last.day), x(todayDay)) : 0;
+
   // Closing the path to the baseline gives the soft fill under the staircase.
   const area = points.length
-    ? `${line} L ${x(last.day)} ${H - PAD_B} L ${x(points[0].day)} ${H - PAD_B} Z`
+    ? `${lineToToday} L ${edgeX} ${H - PAD_B} L ${x(points[0].day)} ${H - PAD_B} Z`
     : '';
 
   return (

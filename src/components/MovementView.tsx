@@ -39,6 +39,13 @@ export function MovementView({
   const doneCount = allDays.filter((d) => d.kind !== 'before' && doneDays.has(d.key)).length;
 
   const totalSeconds = activities.reduce((sum, a) => sum + (a.duration_seconds ?? 0), 0);
+
+  // A training day counts toward the rate once it has come due. Today only
+  // counts once it's actually done - an unfinished day shouldn't read as a miss.
+  const dueTrainingDays = trainingDays.filter(
+    (d) => (d.isPast && !d.isToday) || (d.isToday && doneDays.has(d.key))
+  );
+  const doneTrainingDays = dueTrainingDays.filter((d) => doneDays.has(d.key)).length;
   const daysElapsed = Math.max(0, differenceInCalendarDays(new Date(), startDate)) + 1;
   const elapsedFraction = Math.min(1, daysElapsed / PLAN_DAYS);
 
@@ -88,7 +95,12 @@ export function MovementView({
       </div>
 
       <div className="mb-8">
-        <Stats totalSeconds={totalSeconds} daysElapsed={daysElapsed} />
+        <Stats
+          totalSeconds={totalSeconds}
+          daysElapsed={daysElapsed}
+          dueTrainingDays={dueTrainingDays.length}
+          doneTrainingDays={doneTrainingDays}
+        />
       </div>
 
       <div className="mb-8">

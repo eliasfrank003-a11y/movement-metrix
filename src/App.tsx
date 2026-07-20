@@ -8,7 +8,7 @@ import type { PlanDay } from '@/lib/plan';
 import type { Lesson } from '@/lib/program';
 
 /** The day the plan begins. Days before this render as inactive placeholders. */
-const PLAN_START = new Date(2026, 6, 19); // 19 July 2026
+const PLAN_START = new Date(2026, 6, 20); // 20 July 2026
 
 export default function App() {
   const { habits, activities, isLoading, error, toggleDay, setActiveLesson, refetch } =
